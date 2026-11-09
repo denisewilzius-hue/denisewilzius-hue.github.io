@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maschenproben-Rechner</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#b4456b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#faf6f1;--card:#fff;--tx:#2b2430;--mut:#7a6f80;--ac:#b4456b;--acbg:#f6dfe7;--bd:#e6dcd3;--mk:#ffe08a;--mktx:#2b2430;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1920;--card:#28222c;--tx:#f1ebf3;--mut:#a89dae;--ac:#e57a9c;--acbg:#3b2a33;--bd:#3d3542;--mk:#6b5a1f;--mktx:#fff6d6;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d1920;--card:#28222c;--tx:#f1ebf3;--mut:#a89dae;--ac:#e57a9c;--acbg:#3b2a33;--bd:#3d3542;--mk:#6b5a1f;--mktx:#fff6d6;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:8px 0 4px}
+p.sub{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
+h2{font-size:1rem;margin:0 0 10px}
+.seg{display:flex;gap:6px;margin-bottom:14px}
+.seg button{flex:1;padding:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;cursor:pointer}
+.seg button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:.85rem;color:var(--mut)}
+input,textarea{width:100%;margin-top:3px;padding:9px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:150px;resize:vertical}
+.hint{font-size:.8rem;color:var(--mut);margin:8px 0 0}
+.res{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.pill{background:var(--acbg);border-radius:10px;padding:8px 12px;font-size:.9rem}
+.pill b{display:block;font-size:1.15rem}
+#out{white-space:pre-wrap;word-break:break-word}
+mark{background:var(--mk);color:var(--mktx);border-radius:4px;padding:0 3px}
+.warn{color:var(--ac);font-size:.9rem;margin:6px 0 0}
+.row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+button.pri{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:10px 14px;font:inherit;cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+<h1>🧶 Maschenproben-Rechner</h1>
+<p class="sub">Anleitung anpassen, ohne eine Maschenprobe zu arbeiten.</p>
+
+<div class="seg">
+<button id="bk" class="on">Stricken</button><button id="bh">Häkeln</button>
+</div>
+
+<div class="card">
+<h2>1. Maschenprobe der Anleitung</h2>
+<div class="grid">
+<label>Maschen pro 10 cm<input id="aS" type="number" step="0.5" inputmode="decimal"></label>
+<label>Reihen pro 10 cm<input id="aR" type="number" step="0.5" inputmode="decimal"></label>
+<label>Nadelstärke laut Anleitung (mm)<input id="aN" type="number" step="0.25" inputmode="decimal" placeholder="z. B. 4"></label>
+<label>Garnverbrauch laut Anleitung<input id="aQ" type="number" step="any" inputmode="decimal" placeholder="z. B. 600"></label>
+<label>Einheit<select id="aU" style="width:100%;margin-top:3px;padding:9px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit"><option value="m">Meter</option><option value="g">Gramm</option><option value="k">Knäuel</option></select></label>
+<label>Lauflänge pro Knäuel der Anleitung (m)<input id="aL" type="number" step="any" inputmode="decimal" placeholder="z. B. 120"></label>
+<label>Gewicht pro Knäuel der Anleitung (g)<input id="aG" type="number" step="any" inputmode="decimal" placeholder="z. B. 50"></label>
+</div>
+<p class="hint" id="as">Wird automatisch aus der Anleitung gelesen, sobald du sie lädst oder einfügst. Steht keine Maschenprobe drin, reicht die Nadelstärke.</p>
+</div>
+
+<div class="card">
+<h2>2. Dein Garn und deine Nadel</h2>
+<div class="row" style="margin-top:0"><label for="photo" style="display:inline-block;background:var(--ac);color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;margin:0;font-size:1rem">📷 Banderole fotografieren</label><input id="photo" type="file" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden"></div>
+<p class="hint" id="ys">Fotografiere die Banderole deines Garns oder wähle ein Foto. Die App erkennt den Text auf dem Gerät und übernimmt Lauflänge, Gewicht, Nadelstärke und Maschenprobe. Texterkennung macht Fehler: Bitte alle Werte prüfen und unten bei Bedarf korrigieren.</p>
+<details><summary class="hint">Erkannter Text anzeigen</summary><pre id="raw" class="hint" style="white-space:pre-wrap"></pre></details>
+<div class="grid" style="margin-top:10px">
+<label>Deine Nadelstärke (mm)<input id="bN" type="number" step="0.25" inputmode="decimal" placeholder="z. B. 5"></label>
+<label>Lauflänge deines Garns (m pro 50 g)<input id="bL" type="number" step="5" inputmode="decimal" placeholder="z. B. 120"></label>
+<label>Gewicht pro Knäuel (g)<input id="bG" type="number" value="50" inputmode="decimal"></label>
+<label>Eigene Maschen pro 10 cm (optional)<input id="bS" type="number" step="0.5" inputmode="decimal"></label>
+<label>Eigene Reihen pro 10 cm (optional)<input id="bR" type="number" step="0.5" inputmode="decimal"></label>
+</div>
+<div class="res" style="margin-top:10px">
+<div class="pill">Deine Maschenprobe<b id="gB">–</b></div>
+<div class="pill">Faktor Maschen / Reihen<b id="fx">–</b></div>
+</div>
+<p class="warn" id="wn"></p>
+</div>
+
+<div class="card">
+<h2>3. Anleitung</h2>
+<textarea id="txt" placeholder="Anleitungstext hier einfügen, z. B.:&#10;100 M anschlagen. 40 Reihen glatt rechts stricken. Dann 12 M abketten."></textarea>
+<div class="row">
+<label for="file" style="display:inline-block;background:var(--ac);color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;margin:0;font-size:1rem">📄 Datei wählen (PDF oder TXT)</label><input id="file" type="file" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+<label style="display:flex;gap:6px;align-items:center;margin:0"><input id="sm" type="checkbox" checked style="width:auto;margin:0"> Zahlen unter 6 nicht ändern</label>
+<label style="margin:0">Maschenzahl teilbar durch<input id="rp" type="number" min="1" value="1" style="width:80px"></label>
+</div>
+<p class="hint" id="fs">Du kannst eine PDF- oder Textdatei laden oder den Text aus der Anleitung einfügen. Die Maschenprobe wird dann automatisch ausgefüllt.</p>
+<div class="row"><button class="pri" id="go">Anleitung umrechnen</button></div>
+</div>
+
+<div class="card" id="rc" hidden>
+<h2>Angepasste Anleitung</h2>
+<div id="need" class="res"></div>
+<div id="out"></div>
+<div class="row"><button class="pri" id="cp">Text kopieren</button></div>
+<p class="hint">Gelb markiert = angepasst. Prüfe Zahlen für Rapporte oder Zu- und Abnahmen selbst.</p>
+</div>
+<p class="hint">Hinweis: Ohne Maschenprobe ist alles eine Schätzung. Wer es genau braucht, arbeitet eine Probe und trägt die Werte bei „Eigene Maschen/Reihen“ ein.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script>
+var mode="k",yarn=null;
+var T={k:[[2,34],[2.5,31],[3,28],[3.5,25],[4,22],[4.5,20],[5,18],[6,15],[8,12],[10,9],[12,8]],
+h:[[2,28],[2.5,25],[3,22],[3.5,20],[4,18],[5,15],[6,13],[8,10],[10,8]]};
+// Empfohlene Nadel nach Lauflänge (m/50g) beim Stricken
+var Y=[[250,2.5],[200,3],[150,3.5],[125,4],[100,5],[75,6],[50,8],[30,10]];
+function $(i){return document.getElementById(i)}
+function est(mm){var t=T[mode];if(mm<=t[0][0])return t[0][1];if(mm>=t[t.length-1][0])return t[t.length-1][1];
+for(var i=0;i<t.length-1;i++){if(mm>=t[i][0]&&mm<=t[i+1][0]){var f=(mm-t[i][0])/(t[i+1][0]-t[i][0]);return t[i][1]+f*(t[i+1][1]-t[i][1])}}}
+function rowsOf(s){return s*(mode==="k"?1.4:1.05)}
+function g(p){var s=parseFloat($(p+"S").value),r=parseFloat($(p+"R").value),n=parseFloat($(p+"N").value);
+var y=(p==="b"&&yarn)?yarn[mode=="k"?"strick":"haekel"]:null;
+if(!s&&y&&y.m10){s=n?y.m10+(est(n)-est(y.nadel||n)):y.m10;if(!r&&y.r10)r=y.r10*s/y.m10}
+if(!s&&n)s=est(n);if(!s)return null;if(!r)r=rowsOf(s);return{s:s,r:r,est:!parseFloat($(p+"S").value)}}
+function recNeedle(l){var b=Y[0];for(var i=0;i<Y.length;i++){if(l>=Y[i][0]){b=Y[i];break}b=Y[i]}return b[1]}
+function upd(){var a=g("a"),b=g("b"),w=$("wn");w.textContent="";
+if(b){$("gB").textContent=b.s.toFixed(1).replace(".",",")+" M × "+b.r.toFixed(1).replace(".",",")+" R"+(b.est?" (geschätzt)":"")}else $("gB").textContent="–";
+if(a&&b){$("fx").textContent=(b.s/a.s).toFixed(2).replace(".",",")+" / "+(b.r/a.r).toFixed(2).replace(".",",")}else $("fx").textContent="–";
+var l=parseFloat($("bL").value),n=parseFloat($("bN").value);
+if(l&&n&&mode==="k"){var rc=recNeedle(l);if(Math.abs(n-rc)>=1.5)w.textContent="Dein Garn passt eher zu Nadel "+rc+" mm. Die Schätzung ist dann ungenauer."}
+return{a:a,b:b}}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function run(){var o=upd();if(!o.a||!o.b){alert("Bitte Maschenprobe oder Nadelstärke bei Anleitung und bei dir angeben.");return}
+var fs=o.b.s/o.a.s,fr=o.b.r/o.a.r,skip=$("sm").checked,rp=Math.max(1,parseInt($("rp").value)||1);
+var re=/(?<![\d.,])(\d+)(\s*)(Maschen|Masche|Luftmaschen|Lm|Stäbchen|Stb|fM|M|Reihen|Reihe|Runden|Runde|Rd\.?|R)(?![A-Za-zäöüÄÖÜß])/g;
+var res="",last=0,txt=$("txt").value,m;
+while((m=re.exec(txt))){var n=parseInt(m[1]),row=/^(R|Reihe|Runde|Rd)/i.test(m[3]);var nn=n;
+if(!(skip&&n<6)){nn=row?Math.max(1,Math.round(n*fr)):Math.max(rp,Math.round(n*fs/rp)*rp)}
+res+=esc(txt.slice(last,m.index));
+res+=nn!==n?'<mark title="vorher: '+n+'">'+nn+"</mark>"+esc(m[2]+m[3]):esc(m[0]);
+last=m.index+m[0].length}
+res+=esc(txt.slice(last));$("out").innerHTML=res;need(fs,fr);$("rc").hidden=false;$("rc").scrollIntoView({behavior:"smooth"})}
+["aS","aR","aN","bN","bL","bS","bR"].forEach(function(i){$(i).addEventListener("input",upd)});
+function setMode(m){mode=m;$("bk").className=m==="k"?"on":"";$("bh").className=m==="h"?"on":"";upd()}
+$("bk").onclick=function(){setMode("k")};$("bh").onclick=function(){setMode("h")};
+$("go").onclick=run;
+async function readPdf(f){var buf=await f.arrayBuffer();pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+var doc=await pdfjsLib.getDocument({data:buf,disableWorker:true}).promise,out="";
+for(var i=1;i<=doc.numPages;i++){var pg=await doc.getPage(i),c=await pg.getTextContent(),y=null,line="";
+c.items.forEach(function(it){var yy=it.transform[5];if(y!==null&&Math.abs(yy-y)>2){out+=line+"\n";line=""}line+=it.str;y=yy});out+=line+"\n\n"}return out.trim()}
+$("file").onchange=async function(e){var f=e.target.files[0];if(!f)return;var fs=$("fs");
+if(/\.pdf$/i.test(f.name)){fs.textContent="PDF wird gelesen …";
+try{var t=await readPdf(f);if(t.length<20){fs.textContent="In diesem PDF wurde kein Text gefunden (vermutlich gescannt). Bitte Text einfügen.";return}
+$("txt").value=t;fs.textContent="PDF geladen. Bitte den Text kurz prüfen.";analyze()}catch(x){fs.textContent="Das PDF konnte nicht gelesen werden. Bitte Text kopieren und einfügen."}}
+else{var r=new FileReader();r.onload=function(){$("txt").value=r.result;fs.textContent="Datei geladen.";analyze()};r.readAsText(f)}};
+$("txt").addEventListener("paste",function(){setTimeout(analyze,50)});
+$("txt").addEventListener("dragover",function(e){e.preventDefault()});
+$("txt").addEventListener("drop",function(e){e.preventDefault();var f=e.dataTransfer.files[0];if(f)$("file").onchange({target:{files:[f]}})});
+function num(x){return parseFloat(String(x).replace(",","."))}
+function yarnFromText(t){var bm=t.match(/(\d+(?:[.,]\d+)?)\s*m\s*(?:\/|pro|je|auf)\s*(\d+(?:[.,]\d+)?)\s*g/i);if(bm){$("aL").value=num(bm[1]);$("aG").value=num(bm[2])}
+var j=t.search(/Garnverbrauch|Garnbedarf|Materialverbrauch|Verbrauch|Material/i);if(j<0)return;var w=t.slice(j,j+300);if(bm)w=w.replace(bm[0],"");
+var am=w.match(/[àa]\s*(\d+(?:[.,]\d+)?)\s*g(?![A-Za-zäöüß])/);if(am){$("aG").value=num(am[1]);w=w.replace(am[0],"")}
+var k=w.match(/(\d+(?:[.,]\d+)?)\s*(?:Knäuel|Knäule|Knauel|Kn\.)/i),g=w.match(/(\d+(?:[.,]\d+)?)\s*(?:g|Gramm)(?![A-Za-zäöüß])/),m=w.match(/(\d+(?:[.,]\d+)?)\s*m(?![A-Za-zäöüß²])/);
+if(k){$("aQ").value=num(k[1]);$("aU").value="k"}else if(g){$("aQ").value=num(g[1]);$("aU").value="g"}else if(m){$("aQ").value=num(m[1]);$("aU").value="m"}}
+function need(fs,fr){var d=$("need"),q=num($("aQ").value),u=$("aU").value,aL=num($("aL").value),aG=num($("aG").value),bL=num($("bL").value),bG=num($("bG").value)||50;d.innerHTML="";
+function msg(t){d.innerHTML='<div class="warn">'+t+"</div>"}
+if(!q){msg("Für den Garnbedarf bitte den Garnverbrauch der Anleitung angeben.");return}
+var L;if(u==="m")L=q;else if(u==="g"){if(!aL||!aG){msg("Für Gramm bitte Lauflänge und Gewicht pro Knäuel der Anleitung angeben.");return}L=q*aL/aG}else{if(!aL){msg("Bitte die Lauflänge pro Knäuel der Anleitung angeben.");return}L=q*aL}
+if(!bL){msg("Für den Garnbedarf bitte die Lauflänge deines Garns angeben oder das Garn nachschlagen.");return}
+var Ln=L*Math.sqrt(fs*fr),ball=bL*bG/50,gr=Ln/bL*50,n=Math.ceil(Ln/ball),nr=Math.ceil(Ln*1.1/ball);
+d.innerHTML='<div class="pill">Garnbedarf<b>'+n+' Knäuel</b></div><div class="pill">Mit 10 % Reserve<b>'+nr+' Knäuel</b></div><div class="pill">Menge<b>≈ '+Math.round(Ln)+' m / '+Math.round(gr)+' g</b></div>'}
+async function analyze(){var t=$("txt").value,as=$("as");if(t.length<20)return;var f={},i=t.search(/Maschenprobe|Gauge/i),w="";
+if(i>=0)w=t.slice(i,i+300);else{i=t.search(/10\s*[x×]\s*10\s*cm/i);if(i>=0)w=t.slice(Math.max(0,i-100),i+60)}
+if(w){var ms=w.match(/(\d+(?:[.,]\d+)?)\s*(?:Maschen|Masche|Stäbchen|Stb|fM|Lm|M)(?![A-Za-zäöüß])/),rs=w.match(/(\d+(?:[.,]\d+)?)\s*(?:Reihen|Reihe|Runden|Runde|Rd\.?|R)(?![A-Za-zäöüß])/);if(ms)f.s=num(ms[1]);if(rs)f.r=num(rs[1])}
+var nm=t.match(/(?:Nadel(?:stärke|n|spiel)?|Häkelnadel|Stricknadel)[^\d\n]{0,30}(\d+(?:[.,]\d+)?)\s*mm/i);if(nm)f.n=num(nm[1]);
+var kc=(t.match(/häkel|Stäbchen|Luftmasche|feste Masche|\bfM\b/gi)||[]).length,kk=(t.match(/stricken|rechte Maschen|linke Maschen|glatt rechts|abketten|anschlagen/gi)||[]).length;
+if(!f.s){var s=null;try{s=await window.claude.use("sample")}catch(x){}
+if(s){as.textContent="Suche Maschenprobe in der Anleitung …";try{var d=await s.json("Hier ist der Text einer Strick- oder Häkelanleitung. Finde die Maschenprobe (Maschen und Reihen pro 10 cm) und die Nadelstärke. Antworte NUR mit JSON: {\"m10\":Zahl oder null,\"r10\":Zahl oder null,\"nadel\":mm oder null}\n\n"+t.slice(0,8000));if(d.m10)f.s=num(d.m10);if(d.r10)f.r=num(d.r10);if(d.nadel&&!f.n)f.n=num(d.nadel)}catch(x){}}}
+if(f.s&&(f.s<5||f.s>60))delete f.s;if(f.r&&(f.r<5||f.r>90))delete f.r;
+if(kc>kk&&mode==="k")setMode("h");else if(kk>kc&&mode==="h")setMode("k");
+yarnFromText(t);$("aS").value=f.s||"";$("aR").value=f.r||"";if(f.n)$("aN").value=f.n;
+as.textContent=(f.s||f.n)?"Aus der Anleitung übernommen:"+(f.s?" "+f.s+" Maschen":"")+(f.r?" × "+f.r+" Reihen pro 10 cm":"")+(f.n?", Nadel "+f.n+" mm":"")+". Bitte kurz prüfen.":"Keine Maschenprobe gefunden. Bitte von Hand eintragen oder die Nadelstärke angeben.";upd()}
+function parseLabel(text){var t=String(text).replace(/\u00a0/g," ").replace(/(\d),(\d)/g,"$1.$2"),r={},m;
+m=t.match(/(\d{2,3})\s*g(?:\s*(?:[=\/\-~≈:(]|ca\.?|approx\.?))*\s*(\d{2,4})\s*m(?![a-zA-Z])/i);
+if(m){r.gramm=+m[1];r.lauf_m=+m[2]}else{m=t.match(/(\d{2,4})\s*m(?![a-zA-Z])(?:\s*(?:[=\/\-~≈:()]|ca\.?))*\s*(\d{2,3})\s*g(?![a-zA-Z])/i);if(m){r.lauf_m=+m[1];r.gramm=+m[2]}}
+var nd=[],re=/(\d+(?:\.\d+)?)\s*(?:[-–]\s*(\d+(?:\.\d+)?))?\s*mm/gi;
+while((m=re.exec(t))){var v=m[2]?(+m[1]+ +m[2])/2:+m[1];if(v>=1.5&&v<=25&&nd.indexOf(v)<0)nd.push(v)}
+var gp=[],rg=/(\d{1,2})\s*(?:M|Maschen|sts?)?\s*[x×*]\s*(\d{1,2})/gi;
+while((m=rg.exec(t))){var s=+m[1],q=+m[2];if(s>=8&&s<=50&&q>=8&&q<=70&&!(s===10&&q===10))gp.push([s,q])}
+function mk(i){var o={};if(nd[i])o.nadel=nd[i];if(gp[i]){o.m10=gp[i][0];o.r10=gp[i][1]}return o.nadel||o.m10?o:null}
+r.strick=mk(0);r.haekel=mk(1);return r}
+$("photo").onchange=async function(e){var f=e.target.files[0],ys=$("ys");if(!f)return;
+if(!window.Tesseract){ys.textContent="Die Texterkennung konnte nicht geladen werden. Bitte Internetverbindung prüfen oder Werte von Hand eintragen.";return}
+ys.textContent="Texterkennung startet (beim ersten Mal werden einmalig Sprachdaten geladen) …";
+try{var res=await Tesseract.recognize(f,"deu+eng",{logger:function(m){if(m.status==="recognizing text")ys.textContent="Texterkennung … "+Math.round(m.progress*100)+" %"}});
+var text=res.data.text;$("raw").textContent=text;var d=parseLabel(text);yarn=d;
+var L=d.lauf_m,G=d.gramm;if(L&&G){$("bL").value=Math.round(L*50/G);$("bG").value=G}
+var k=d.strick||{},h=d.haekel||{},t=[];
+if(L&&G)t.push(L+" m / "+G+" g");
+if(k.nadel)t.push("Nadel "+k.nadel+" mm");if(k.m10)t.push("Maschenprobe "+k.m10+" × "+k.r10);
+if(h.nadel)t.push("zweite Nadel "+h.nadel+" mm");if(h.m10)t.push("zweite Maschenprobe "+h.m10+" × "+h.r10);
+ys.textContent=t.length?"Erkannt: "+t.join(" · ")+". Bitte mit dem Etikett vergleichen. Die erste Nadel gilt fürs Stricken, die zweite fürs Häkeln.":"Auf dem Foto wurden keine Garnwerte erkannt. Bitte näher, bei gutem Licht und gerade fotografieren oder die Werte von Hand eintragen.";
+if(!$("bN").value){var rn=(mode==="k"?k:h).nadel;if(rn)$("bN").placeholder="empfohlen: "+rn}
+upd()}catch(x){ys.textContent="Die Texterkennung ist fehlgeschlagen. Bitte Werte von Hand eintragen."}
+e.target.value=""};
+$("cp").onclick=function(){var t=$("out").innerText;try{navigator.clipboard.writeText(t);$("cp").textContent="Kopiert ✓"}catch(e){var s=window.getSelection(),r=document.createRange();r.selectNodeContents($("out"));s.removeAllRanges();s.addRange(r)}};
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+</script>
+</body>
+</html>
